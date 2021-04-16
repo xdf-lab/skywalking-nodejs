@@ -21,7 +21,13 @@ import PluginInstaller from './PluginInstaller';
 import Span from '../trace/span/Span';
 
 export default interface SwPlugin {
+  /**
+   * 模块名
+   */
   readonly module: string;
+  /**
+   * 兼容的版本号 
+   */
   readonly versions: string;
 
   install(installer: PluginInstaller): void;
@@ -31,33 +37,43 @@ export const wrapEmit = (span: Span, ee: any, doError: boolean = true, stop: any
   const stopIsFunc = typeof stop === 'function';
   const _emit = ee.emit;
 
-  Object.defineProperty(ee, 'emit', {configurable: true, writable: true, value: (function(this: any): any {
-    const event = arguments[0];
+  Object.defineProperty(ee, 'emit', {
+    configurable: true, writable: true, value: (function (this: any): any {
+      const event = arguments[0];
 
-    span.resync();
+      span.resync();
 
-    try {
-      if (doError && event === 'error')
-        span.error(arguments[1]);
+      try {
+        if (doError && event === 'error')
+          span.error(arguments[1]);
 
-      return _emit.apply(this, arguments);
+        return _emit.apply(this, arguments);
 
-    } catch (err) {
-      span.error(err);
+      } catch (err) {
+        span.error(err);
 
-      throw err;
+        throw err;
 
-    } finally {
-      if (stopIsFunc ? stop(event) : event === stop)
-        span.stop();
-      else
-        span.async();
-    }
-  })});
+      } finally {
+        if (stopIsFunc ? stop(event) : event === stop)
+          span.stop();
+        else
+          span.async();
+      }
+    })
+  });
 };
 
+/**
+ * callback 封装
+ * 
+ * @param span 
+ * @param callback 
+ * @param idxError 
+ * @returns 
+ */
 export const wrapCallback = (span: Span, callback: any, idxError: any = false) => {
-  return function(this: any) {
+  return function (this: any) {
     if (idxError !== false && arguments[idxError])
       span.error(arguments[idxError]);
 

@@ -34,12 +34,22 @@ while (topModule.parent) {
 export default class PluginInstaller {
   private readonly pluginDir: string;
   readonly require: (name: string) => any = topModule.require.bind(topModule);
+  /**
+   * 查找模块路径
+   * @param request 模块名
+   * @returns 
+   */
   private readonly resolve = (request: string) => (module.constructor as any)._resolveFilename(request, topModule);
 
   constructor() {
     this.pluginDir = path.resolve(__dirname, '..', 'plugins');
   }
 
+  /**
+   * 判断是否为 `node` 内置模块
+   * @param module 
+   * @returns 
+   */
   private isBuiltIn = (module: string): boolean => this.resolve(module) === module;
 
   private checkModuleVersion = (plugin: SwPlugin): { version: string; isSupported: boolean } => {
@@ -77,35 +87,35 @@ export default class PluginInstaller {
 
   install(): void {
     fs.readdirSync(this.pluginDir)
-    .filter((file) => !(file.endsWith('.d.ts') || file.endsWith('.js.map')))
-    .forEach((file) => {
-      if (file.replace(/(?:Plugin)?\.js$/i, '').match(config.reDisablePlugins)) {
-        logger.info(`Plugin ${file} not installed because it is disabled`);
-        return;
-      }
-
-      let plugin;
-      const pluginFile = path.join(this.pluginDir, file);
-
-      try {
-        plugin = require(pluginFile).default as SwPlugin;
-        const { isSupported, version } = this.checkModuleVersion(plugin);
-
-        if (!isSupported) {
-          logger.info(`Plugin ${plugin.module} ${version} doesn't satisfy the supported version ${plugin.versions}`);
+      .filter((file) => !(file.endsWith('.d.ts') || file.endsWith('.js.map')))
+      .forEach((file) => {
+        if (file.replace(/(?:Plugin)?\.js$/i, '').match(config.reDisablePlugins)) {
+          logger.info(`Plugin ${file} not installed because it is disabled`);
           return;
         }
 
-        logger.info(`Installing plugin ${plugin.module} ${plugin.versions}`);
+        let plugin;
+        const pluginFile = path.join(this.pluginDir, file);
 
-        plugin.install(this);
-      } catch (e) {
-        if (plugin) {
-          logger.error(`Error installing plugin ${plugin.module} ${plugin.versions}`);
-        } else {
-          logger.error(`Error processing plugin ${pluginFile}`);
+        try {
+          plugin = require(pluginFile).default as SwPlugin;
+          const { isSupported, version } = this.checkModuleVersion(plugin);
+
+          if (!isSupported) {
+            logger.info(`Plugin ${plugin.module} ${version} doesn't satisfy the supported version ${plugin.versions}`);
+            return;
+          }
+
+          logger.info(`Installing plugin ${plugin.module} ${plugin.versions}`);
+
+          plugin.install(this);
+        } catch (e) {
+          if (plugin) {
+            logger.error(`Error installing plugin ${plugin.module} ${plugin.versions}`);
+          } else {
+            logger.error(`Error processing plugin ${pluginFile}`);
+          }
         }
-      }
-    });
+      });
   }
 }

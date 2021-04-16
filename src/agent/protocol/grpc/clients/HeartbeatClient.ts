@@ -43,6 +43,7 @@ export default class HeartbeatClient implements Client {
   }
 
   get isConnected(): boolean {
+    // https://grpc.github.io/grpc/node/grpc.Channel.html#getConnectivityState__anchor
     return this.managementServiceClient.getChannel().getConnectivityState(true) === connectivityState.READY;
   }
 
@@ -57,20 +58,21 @@ export default class HeartbeatClient implements Client {
     }
 
     const keepAlivePkg = new InstancePingPkg()
-    .setService(config.serviceName)
-    .setServiceinstance(config.serviceInstance);
+      .setService(config.serviceName)
+      .setServiceinstance(config.serviceInstance);
 
     const instanceProperties = new InstanceProperties()
-    .setService(config.serviceName)
-    .setServiceinstance(config.serviceInstance)
-    .setPropertiesList([
-      new KeyStringValuePair().setKey('language').setValue('NodeJS'),
-      new KeyStringValuePair().setKey('OS Name').setValue(os.platform()),
-      new KeyStringValuePair().setValue('hostname').setValue(os.hostname()),
-      new KeyStringValuePair().setValue('Process No.').setValue(`${process.pid}`),
-    ]);
+      .setService(config.serviceName)
+      .setServiceinstance(config.serviceInstance)
+      .setPropertiesList([
+        new KeyStringValuePair().setKey('language').setValue('NodeJS'),
+        new KeyStringValuePair().setKey('OS Name').setValue(os.platform()),
+        new KeyStringValuePair().setValue('hostname').setValue(os.hostname()),
+        new KeyStringValuePair().setValue('Process No.').setValue(`${process.pid}`),
+      ]);
 
     this.heartbeatTimer = setInterval(() => {
+      // 上报 instance 信息 
       this.managementServiceClient.reportInstanceProperties(
         instanceProperties,
 
@@ -80,6 +82,8 @@ export default class HeartbeatClient implements Client {
           }
         },
       );
+
+      // keepalive 包 
       this.managementServiceClient.keepAlive(
         keepAlivePkg,
 

@@ -26,11 +26,11 @@ import PluginInstaller from '../core/PluginInstaller';
 import agentConfig from '../config/AgentConfig';
 
 class MySQLPlugin implements SwPlugin {
-  readonly module = 'mysql';
+  readonly module = 'mysql2';
   readonly versions = '*';
 
   install(installer: PluginInstaller): void {
-    const Connection = installer.require('mysql/lib/Connection');
+    const Connection = installer.require('mysql2/lib/connection');
     const _query = Connection.prototype.query;
 
     Connection.prototype.query = function (sql: any, values: any, cb: any) {

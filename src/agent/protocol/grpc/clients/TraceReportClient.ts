@@ -37,12 +37,18 @@ export default class TraceReportClient implements Client {
   private timeout?: NodeJS.Timeout;
 
   constructor() {
+    /**
+     * 包缓存 非原生buffer bufferArray 
+     */
     this.buffer = new Buffer();
     this.reporterClient = new TraceSegmentReportServiceClient(
       config.collectorAddress,
       grpc.credentials.createInsecure(),
       { interceptors: [AuthInterceptor] },
     );
+    /**
+     * 监听消息 
+     */
     emitter.on('segment-finished', (segment) => {
       if (this.buffer.put(segment)) {
         this.timeout?.ref();
@@ -61,6 +67,9 @@ export default class TraceReportClient implements Client {
           return;
         }
 
+        /**
+         * client stream 形式
+         */
         const stream = this.reporterClient.collect((error, _) => {
           if (error) {
             logger.error('Failed to report trace data', error);
@@ -73,13 +82,14 @@ export default class TraceReportClient implements Client {
             if (logger.isDebugEnabled()) {
               logger.debug('Sending segment ', { segment });
             }
-
+            // 发送消息 
             stream.write(new SegmentObjectAdapter(segment));
           }
         }
 
         stream.end();
       } finally {
+        // 一秒一次
         this.timeout = setTimeout(reportFunction, 1000).unref();
       }
     };

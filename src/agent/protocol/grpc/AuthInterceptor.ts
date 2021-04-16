@@ -24,6 +24,7 @@ import config from '../../../config/AgentConfig';
 type Options = { [key: string]: string | number };
 
 export default function AuthInterceptor(options: Options, nextCall: (options: Options) => InterceptingCall) {
+  // https://grpc.github.io/grpc/node/module-src_client_interceptors.html#toc0__anchor
   return new grpc.InterceptingCall(
     nextCall(options),
     new (class implements Requester {
