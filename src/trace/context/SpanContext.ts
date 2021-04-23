@@ -65,6 +65,9 @@ export default class SpanContext implements Context {
   }
 
   newEntrySpan(operation: string, carrier?: ContextCarrier, inherit?: Component): Span {
+    /**
+     * 忽略的追踪 
+     */
     let span = this.ignoreCheck(operation, SpanType.ENTRY);
 
     if (span)

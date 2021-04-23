@@ -17,7 +17,7 @@
  *
  */
 
-import SwPlugin, {wrapEmit} from '../core/SwPlugin';
+import SwPlugin, { wrapEmit } from '../core/SwPlugin';
 import { URL } from 'url';
 import { ClientRequest, IncomingMessage, RequestOptions, ServerResponse } from 'http';
 import ContextManager from '../trace/context/ContextManager';
@@ -52,11 +52,11 @@ class HttpPlugin implements SwPlugin {
         url instanceof URL
           ? url
           : typeof url === 'string'
-          ? new URL(url)  // TODO: this may throw invalid URL
-          : {
-            host: (url.host || url.hostname || 'unknown') + ':' + (url.port || 80),
-            pathname: url.path || '/',
-          };
+            ? new URL(url)  // TODO: this may throw invalid URL
+            : {
+              host: (url.host || url.hostname || 'unknown') + ':' + (url.port || 80),
+              pathname: url.path || '/',
+            };
 
       const operation = pathname.replace(/\?.*$/g, '');
       const span: ExitSpan = ContextManager.current.newExitSpan(operation, host, Component.HTTP) as ExitSpan;
@@ -83,10 +83,10 @@ class HttpPlugin implements SwPlugin {
           if (res.statusMessage)
             span.tag(Tag.httpStatusMsg(res.statusMessage));
 
-            wrapEmit(span, res, false);
+          wrapEmit(span, res, false);
         };
 
-        const responseCB = function(this: any, res: any) {  // may wrap callback instead of event because it procs first
+        const responseCB = function (this: any, res: any) {  // may wrap callback instead of event because it procs first
           span.resync();
 
           copyStatusAndWrapEmit(res);
@@ -106,7 +106,7 @@ class HttpPlugin implements SwPlugin {
         };
 
         const idxCallback = typeof arguments[2] === 'function' ? 2 : typeof arguments[1] === 'function' ? 1 : 0;
-        const callback    = arguments[idxCallback];
+        const callback = arguments[idxCallback];
 
         if (idxCallback)
           arguments[idxCallback] = responseCB;
@@ -114,7 +114,7 @@ class HttpPlugin implements SwPlugin {
         const req: ClientRequest = _request.apply(this, arguments);
 
         span.inject().items.forEach((item) => req.setHeader(item.key, item.value));
-
+        // 请求结束 
         wrapEmit(span, req, true, 'close');
 
         req.on('timeout', () => span.log('Timeout', true));

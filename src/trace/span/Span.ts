@@ -40,6 +40,9 @@ export type SpanCtorOptions = {
 
 const logger = createLogger(__filename);
 
+/**
+ * Span 父类
+ */
 export default abstract class Span {
   readonly context: Context;
   readonly type: SpanType;
@@ -133,7 +136,7 @@ export default abstract class Span {
   log(key: string, val: any): this {
     this.logs.push({
       timestamp: new Date().getTime(),
-      items: [{key, val: `${val}`}]
+      items: [{ key, val: `${val}` }]
     } as Log);
 
     return this;

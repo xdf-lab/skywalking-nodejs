@@ -36,6 +36,9 @@ export default {
   mqBrokerKey: 'mq.broker',
   mqTopicKey: 'mq.topic',
   mqQueueKey: 'mq.queue',
+  cacheTypeKey: 'cache.type',
+  cacheInstanceKey: 'cache.instance',
+  cacheCommandKey: 'cache.command',
 
   httpStatusCode(val: string | number | undefined): Tag {
     return {
@@ -119,6 +122,27 @@ export default {
       key: this.mqQueueKey,
       overridable: true,
       val: `${val}`,
+    } as Tag;
+  },
+  cacheType(val: string | undefined) {
+    return {
+      key: this.cacheTypeKey,
+      overridable: true,
+      val: `${val}`
+    } as Tag;
+  },
+  cacheInstance(val: string | undefined) {
+    return {
+      key: this.cacheInstanceKey,
+      overridable: true,
+      val: `${val}`
+    } as Tag;
+  },
+  cacheCommand(val: string | undefined) {
+    return {
+      key: this.cacheCommandKey,
+      overridable: true,
+      val: `${val}`
     } as Tag;
   },
 };

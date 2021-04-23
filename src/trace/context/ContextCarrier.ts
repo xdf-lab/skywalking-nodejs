@@ -20,6 +20,9 @@
 import ID from '../../trace/ID';
 import { CarrierItem } from './CarrierItem';
 
+/**
+ * trace id
+ */
 export class ContextCarrier extends CarrierItem {
   constructor(
     public traceId?: ID,

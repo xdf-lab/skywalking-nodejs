@@ -22,6 +22,9 @@ import ID from '../../trace/ID';
 import NewID from '../../trace/NewID';
 import SegmentRef from '../../trace/context/SegmentRef';
 
+/**
+ * 一个 Segment 包含很多的 span  
+ */
 export default class Segment {
   segmentId = new ID();
   spans: Span[] = [];
@@ -32,6 +35,10 @@ export default class Segment {
     this.spans.push(span);
   }
 
+  /**
+   * 关联一个 trace  
+   * @param id 
+   */
   relate(id: ID) {
     if (this.relatedTraces[0] instanceof NewID) {
       this.relatedTraces.shift();

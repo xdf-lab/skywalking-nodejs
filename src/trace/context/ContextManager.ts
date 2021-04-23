@@ -61,6 +61,7 @@ class ContextManager {
     // since `AsyncLocalStorage.getStore` may get previous state, see issue https://github.com/nodejs/node/issues/35286#issuecomment-697207158, so recreate when asyncState is not valid
     // Necessary because span may "finish()" in a child async task of where the asyncState was actually created and so clearing in the child would not clear in parent and invalid asyncState would be reused in new children of that parent.
     let asyncState = store.getStore();
+    // 初始化 
     if (!asyncState?.valid) {
       asyncState = { spans: [], valid: true };
       store.enterWith(asyncState);
